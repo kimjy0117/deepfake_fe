@@ -1,7 +1,24 @@
 import axios from 'axios';
 
-// API 기본 설정
-const API_BASE_URL = 'http://192.168.3.115:8080/api/v1';
+/**
+ * API 기본 설정
+ * 
+ * 환경변수 VITE_API_BASE_URL을 사용하여 API 서버 URL을 설정합니다.
+ * 
+ * Netlify 배포 시 환경변수 설정 방법:
+ * 1. Netlify 대시보드 → Site settings → Environment variables
+ * 2. Key: VITE_API_BASE_URL
+ * 3. Value: https://your-api-server.com/api/v1 (실제 API 서버 URL)
+ * 
+ * 로컬 개발 시 .env 파일에 다음과 같이 설정:
+ * VITE_API_BASE_URL=http://localhost:8080/api/v1
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+
+// 개발 환경에서 환경변수 확인을 위한 로그
+if (import.meta.env.DEV) {
+  console.log('API Base URL:', API_BASE_URL);
+}
 // axios 인스턴스 생성
 const api = axios.create({
   baseURL: API_BASE_URL,

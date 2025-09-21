@@ -22,8 +22,22 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
-              <Route path="public-gallery" element={<PublicGalleryPage />} />
-              <Route path="file/:type/:fileId" element={<FileDetailPage />} />
+              <Route 
+                path="public-gallery" 
+                element={
+                  <ProtectedRoute>
+                    <PublicGalleryPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="file/:type/:fileId" 
+                element={
+                  <ProtectedRoute>
+                    <FileDetailPage />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="gallery" 
                 element={

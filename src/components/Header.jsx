@@ -20,9 +20,11 @@ const Header = () => {
         </Link>
         
         <nav className={styles.nav}>
-          <Link to="/public-gallery" className={styles.navLink}>
-            공개 갤러리
-          </Link>
+          {isAuthenticated && (
+            <Link to="/public-gallery" className={styles.navLink}>
+              공개 갤러리
+            </Link>
+          )}
           {isAuthenticated ? (
             <>
               <Link to="/gallery" className={styles.navLink}>

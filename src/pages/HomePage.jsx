@@ -36,12 +36,9 @@ const HomePage = () => {
             ) : (
               <div className={styles.heroActions}>
                 <Link to="/register" className="btn btn-primary btn-lg">
-                  시작하기
+                  회원가입하고 시작하기
                 </Link>
-                <Link to="/public-gallery" className="btn btn-outline btn-lg">
-                  공개 갤러리 둘러보기
-                </Link>
-                <Link to="/login" className="btn btn-secondary btn-lg">
+                <Link to="/login" className="btn btn-outline btn-lg">
                   로그인
                 </Link>
               </div>
@@ -97,9 +94,14 @@ const HomePage = () => {
 
         <div className={styles.cta}>
           <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>지금 시작해보세요!</h2>
+            <h2 className={styles.ctaTitle}>
+              {isAuthenticated ? '갤러리를 즐겨보세요!' : '지금 시작해보세요!'}
+            </h2>
             <p className={styles.ctaDescription}>
-              무료로 계정을 만들고 나만의 갤러리를 구성해보세요
+              {isAuthenticated 
+                ? '나만의 갤러리를 관리하고 다른 사용자들의 작품도 감상해보세요'
+                : '무료로 계정을 만들고 나만의 갤러리를 구성해보세요'
+              }
             </p>
             {!isAuthenticated && (
               <Link to="/register" className="btn btn-primary btn-lg">

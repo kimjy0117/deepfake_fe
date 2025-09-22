@@ -13,7 +13,7 @@ import axios from 'axios';
  * 로컬 개발 시 .env 파일에 다음과 같이 설정:
  * VITE_API_BASE_URL=http://localhost:8080/api/v1
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://deepfake-be.onrender.com/api/v1';
 
 // 개발 환경에서 환경변수 확인을 위한 로그
 if (import.meta.env.DEV) {

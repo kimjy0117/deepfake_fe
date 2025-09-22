@@ -5,7 +5,20 @@ import styles from './PublicGalleryPage.module.css';
 
 const PublicGalleryPage = () => {
   const [activeTab, setActiveTab] = useState('images');
-  const { publicFiles, loading, stats } = useGallery();
+  const { publicFiles, loading, stats, loadPublicFiles, loadStats } = useGallery();
+
+  // 수동 새로고침 함수
+  const handleRefresh = async () => {
+    console.log('공개 갤러리 수동 새로고침');
+    try {
+      await Promise.all([
+        loadPublicFiles(),
+        loadStats()
+      ]);
+    } catch (error) {
+      console.error('새로고침 실패:', error);
+    }
+  };
 
   // 파일 타입별로 필터링 (백엔드 FileType enum 고려)
   const allImages = publicFiles.filter(file => 
@@ -34,10 +47,17 @@ const PublicGalleryPage = () => {
       </h3>
       <p className={styles.emptyDescription}>
         {type === 'images' 
-          ? '아직 공유된 이미지가 없어요. 첫 번째 이미지를 업로드해보세요!' 
-          : '아직 공유된 영상이 없어요. 첫 번째 영상을 업로드해보세요!'
+          ? '아직 공유된 이미지가 없어요. 내 갤러리에서 첫 번째 이미지를 업로드해보세요!' 
+          : '아직 공유된 영상이 없어요. 내 갤러리에서 첫 번째 영상을 업로드해보세요!'
         }
       </p>
+      <button
+        onClick={handleRefresh}
+        className="btn btn-primary"
+        disabled={loading}
+      >
+        {loading ? '새로고침 중...' : '새로고침'}
+      </button>
     </div>
   );
 
@@ -50,6 +70,15 @@ const PublicGalleryPage = () => {
             <p className={styles.subtitle}>
               모든 사용자가 공유한 이미지와 영상을 둘러보세요
             </p>
+          </div>
+          <div className={styles.headerActions}>
+            <button
+              onClick={handleRefresh}
+              className={`btn btn-outline ${styles.refreshBtn}`}
+              disabled={loading}
+            >
+              {loading ? '새로고침 중...' : '🔄 새로고침'}
+            </button>
           </div>
           <div className={styles.statsInfo}>
             <div className={styles.statBadge}>

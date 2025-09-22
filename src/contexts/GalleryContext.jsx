@@ -177,28 +177,32 @@ export const GalleryProvider = ({ children }) => {
     }
   };
 
-  // 컴포넌트 마운트 시 공개 파일과 통계 로드
-  useEffect(() => {
-    loadPublicFiles();
-    loadStats();
-  }, []);
-
-  // 로그인 상태 변경 시 내 파일 로드
+  // 로그인 상태 변경 시 모든 데이터 로드
   useEffect(() => {
     console.log('GalleryContext - 인증 상태 변경:', isAuthenticated);
     
     if (isAuthenticated) {
-      console.log('인증됨 - 내 파일 로드 시도');
+      console.log('인증됨 - 모든 데이터 로드 시도');
       // 약간의 지연을 두어 AuthContext 초기화가 완료된 후 API 호출
       setTimeout(() => {
-        loadMyFiles().catch(error => {
-          console.warn('내 파일 로드 실패 (무시됨):', error);
-          // 에러가 발생해도 로그아웃하지 않음
-        });
+        // 공개 파일, 통계, 내 파일 모두 로드
+        Promise.all([
+          loadPublicFiles().catch(error => {
+            console.warn('공개 파일 로드 실패 (무시됨):', error);
+          }),
+          loadStats().catch(error => {
+            console.warn('통계 로드 실패 (무시됨):', error);
+          }),
+          loadMyFiles().catch(error => {
+            console.warn('내 파일 로드 실패 (무시됨):', error);
+          })
+        ]);
       }, 100);
     } else {
-      console.log('인증되지 않음 - 내 파일 목록 초기화');
+      console.log('인증되지 않음 - 모든 데이터 초기화');
       setMyFiles([]);
+      setPublicFiles([]);
+      setStats(null);
     }
   }, [isAuthenticated]);
 

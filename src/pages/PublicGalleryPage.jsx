@@ -1,18 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGallery } from '../contexts/GalleryContext';
 import PublicGalleryCard from '../components/PublicGalleryCard';
 import styles from './PublicGalleryPage.module.css';
 
 const PublicGalleryPage = () => {
   const [activeTab, setActiveTab] = useState('images');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const { publicFiles, loading, stats, loadPublicFiles, loadStats } = useGallery();
+  
+  const ITEMS_PER_PAGE = 20;
+
+  // 페이지네이션을 고려한 파일 로드
+  const loadFilesWithPagination = async (page = 1, type = null) => {
+    console.log('페이지네이션 파일 로드:', { page, type: type || activeTab });
+    try {
+      const fileType = type || activeTab;
+      const params = {
+        type: fileType === 'images' ? 'image' : fileType === 'videos' ? 'video' : 'all',
+        page,
+        size: ITEMS_PER_PAGE,
+        sort: 'uploadedAt',
+        order: 'desc'
+      };
+      
+      const result = await loadPublicFiles(params);
+      
+      if (result.success && result.data) {
+        // 페이지네이션 정보 업데이트
+        setTotalPages(result.data.totalPages || 1);
+        setTotalItems(result.data.totalElements || result.data.files?.length || 0);
+        setCurrentPage(page);
+        console.log('페이지네이션 정보:', {
+          totalPages: result.data.totalPages,
+          totalElements: result.data.totalElements,
+          currentPage: page
+        });
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('파일 로드 실패:', error);
+      return { success: false, error: '파일 로드 중 오류가 발생했습니다.' };
+    }
+  };
+
+  // 탭 변경 핸들러
+  const handleTabChange = async (newTab) => {
+    if (newTab !== activeTab) {
+      setActiveTab(newTab);
+      setCurrentPage(1); // 탭 변경 시 첫 페이지로 리셋
+      await loadFilesWithPagination(1, newTab);
+    }
+  };
+
+  // 페이지 변경 핸들러
+  const handlePageChange = async (page) => {
+    if (page !== currentPage && page >= 1 && page <= totalPages) {
+      await loadFilesWithPagination(page);
+    }
+  };
 
   // 수동 새로고침 함수
   const handleRefresh = async () => {
     console.log('공개 갤러리 수동 새로고침');
     try {
       await Promise.all([
-        loadPublicFiles(),
+        loadFilesWithPagination(1),
         loadStats()
       ]);
     } catch (error) {
@@ -20,22 +75,121 @@ const PublicGalleryPage = () => {
     }
   };
 
-  // 파일 타입별로 필터링 (백엔드 FileType enum 고려)
-  const allImages = publicFiles.filter(file => 
-    file.type === 'IMAGE' || 
-    file.type === 'image' || 
-    (file.mimeType && file.mimeType.startsWith('image/'))
-  );
-  
-  const allVideos = publicFiles.filter(file => 
-    file.type === 'VIDEO' || 
-    file.type === 'video' || 
-    (file.mimeType && file.mimeType.startsWith('video/'))
-  );
+  // 컴포넌트 마운트 시 초기 데이터 로드
+  useEffect(() => {
+    loadFilesWithPagination(1);
+    loadStats();
+  }, []); // 빈 의존성 배열로 마운트 시에만 실행
 
-  // 최신 업로드 순으로 정렬
-  const sortedImages = [...allImages].sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-  const sortedVideos = [...allVideos].sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+  // 서버에서 이미 필터링되고 정렬된 데이터를 사용
+  // publicFiles는 현재 활성 탭에 해당하는 파일들만 포함됨
+  const currentFiles = publicFiles || [];
+  
+  // 페이지네이션 컴포넌트
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    // 시작과 끝 페이지 계산
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // 끝에서부터 역산해서 시작 페이지 조정
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // 이전 페이지 버튼
+    if (currentPage > 1) {
+      pages.push(
+        <button
+          key="prev"
+          onClick={() => handlePageChange(currentPage - 1)}
+          className={`${styles.pageBtn} ${styles.navBtn}`}
+          disabled={loading}
+        >
+          이전
+        </button>
+      );
+    }
+
+    // 첫 페이지 (필요한 경우)
+    if (startPage > 1) {
+      pages.push(
+        <button
+          key={1}
+          onClick={() => handlePageChange(1)}
+          className={styles.pageBtn}
+          disabled={loading}
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pages.push(<span key="ellipsis1" className={styles.ellipsis}>...</span>);
+      }
+    }
+
+    // 페이지 번호들
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`${styles.pageBtn} ${i === currentPage ? styles.activePage : ''}`}
+          disabled={loading}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    // 마지막 페이지 (필요한 경우)
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(<span key="ellipsis2" className={styles.ellipsis}>...</span>);
+      }
+      pages.push(
+        <button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          className={styles.pageBtn}
+          disabled={loading}
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    // 다음 페이지 버튼
+    if (currentPage < totalPages) {
+      pages.push(
+        <button
+          key="next"
+          onClick={() => handlePageChange(currentPage + 1)}
+          className={`${styles.pageBtn} ${styles.navBtn}`}
+          disabled={loading}
+        >
+          다음
+        </button>
+      );
+    }
+
+    return (
+      <div className={styles.pagination}>
+        <div className={styles.paginationInfo}>
+          <span className={styles.pageInfo}>
+            {currentPage} / {totalPages} 페이지 (총 {totalItems}개)
+          </span>
+        </div>
+        <div className={styles.paginationButtons}>
+          {pages}
+        </div>
+      </div>
+    );
+  };
 
   const renderEmptyState = (type) => (
     <div className={styles.emptyState}>
@@ -104,16 +258,18 @@ const PublicGalleryPage = () => {
 
         <div className={styles.galleryTabs}>
           <button
-            onClick={() => setActiveTab('images')}
+            onClick={() => handleTabChange('images')}
             className={`${styles.tabBtn} ${activeTab === 'images' ? styles.activeTab : ''}`}
+            disabled={loading}
           >
-            이미지 ({sortedImages.length})
+            이미지 {stats && `(${stats.totalImages || 0})`}
           </button>
           <button
-            onClick={() => setActiveTab('videos')}
+            onClick={() => handleTabChange('videos')}
             className={`${styles.tabBtn} ${activeTab === 'videos' ? styles.activeTab : ''}`}
+            disabled={loading}
           >
-            영상 ({sortedVideos.length})
+            영상 {stats && `(${stats.totalVideos || 0})`}
           </button>
         </div>
 
@@ -124,34 +280,21 @@ const PublicGalleryPage = () => {
               <p>파일 목록을 불러오는 중...</p>
             </div>
           ) : (
-            activeTab === 'images' ? (
-              sortedImages.length > 0 ? (
+            currentFiles.length > 0 ? (
+              <>
                 <div className={styles.galleryGrid}>
-                  {sortedImages.map((image) => (
+                  {currentFiles.map((file) => (
                     <PublicGalleryCard
-                      key={image.id}
-                      item={image}
-                      type="image"
+                      key={file.id}
+                      item={file}
+                      type={activeTab === 'images' ? 'image' : 'video'}
                     />
                   ))}
                 </div>
-              ) : (
-                renderEmptyState('images')
-              )
+                {renderPagination()}
+              </>
             ) : (
-              sortedVideos.length > 0 ? (
-                <div className={styles.galleryGrid}>
-                  {sortedVideos.map((video) => (
-                    <PublicGalleryCard
-                      key={video.id}
-                      item={video}
-                      type="video"
-                    />
-                  ))}
-                </div>
-              ) : (
-                renderEmptyState('videos')
-              )
+              renderEmptyState(activeTab)
             )
           )}
         </div>

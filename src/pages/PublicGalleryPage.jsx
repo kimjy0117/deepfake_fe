@@ -28,14 +28,21 @@ const PublicGalleryPage = () => {
       const result = await loadPublicFiles(params);
       
       if (result.success && result.data) {
+        // 서버 응답에서 pagination 객체 사용
+        const pagination = result.data.pagination;
+        const totalPages = pagination?.totalPages || 1;
+        const totalElements = pagination?.totalElements || result.data.files?.length || 0;
+        
         // 페이지네이션 정보 업데이트
-        setTotalPages(result.data.totalPages || 1);
-        setTotalItems(result.data.totalElements || result.data.files?.length || 0);
+        setTotalPages(totalPages);
+        setTotalItems(totalElements);
         setCurrentPage(page);
+        
         console.log('페이지네이션 정보:', {
-          totalPages: result.data.totalPages,
-          totalElements: result.data.totalElements,
-          currentPage: page
+          currentPage: page,
+          totalPages,
+          totalElements,
+          filesCount: result.data.files?.length
         });
       }
       
@@ -86,8 +93,10 @@ const PublicGalleryPage = () => {
   const currentFiles = publicFiles || [];
   
   // 페이지네이션 컴포넌트
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
+  const renderPagination = () => {    
+    if (totalPages <= 1) {
+      return null;
+    }
 
     const pages = [];
     const maxVisiblePages = 5;
@@ -237,7 +246,7 @@ const PublicGalleryPage = () => {
           <div className={styles.statsInfo}>
             <div className={styles.statBadge}>
               <span className={styles.statNumber}>
-                {stats ? stats.totalFiles : (allImages.length + allVideos.length)}
+                {stats ? stats.totalFiles : totalItems}
               </span>
               <span className={styles.statLabel}>총 파일</span>
             </div>

@@ -93,7 +93,11 @@ export const fileService = {
         params: { type, page, size, sort, order }
       });
 
-      console.log('공개 파일 목록 응답:', response.data);
+      console.log('공개 파일 목록 응답:', {
+        filesCount: response.data.data?.files?.length || response.data.files?.length,
+        totalPages: response.data.data?.pagination?.totalPages,
+        totalElements: response.data.data?.pagination?.totalElements
+      });
 
       return {
         success: true,

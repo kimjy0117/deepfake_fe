@@ -3,6 +3,118 @@
   padding: var(--spacing-xl) 0;
 }
 
+/* 로딩 상태 */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: var(--spacing-lg);
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 페이지네이션 스타일 */
+.pagination {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.paginationInfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pageInfo {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.paginationButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pageBtn {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background-color: var(--primary-color);
+  color: var(--text-white);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+}
+
+.pageBtn.activePage {
+  background-color: var(--primary-color);
+  color: var(--text-white);
+  border-color: var(--primary-color);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-sm);
+}
+
+.pageBtn.navBtn {
+  font-weight: var(--font-weight-semibold);
+  min-width: 60px;
+}
+
+.ellipsis {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  padding: 0 var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
 .galleryHeader {
   display: flex;
   justify-content: space-between;
@@ -149,6 +261,27 @@
   .galleryStats {
     gap: var(--spacing-lg);
   }
+  
+  /* 태블릿 페이지네이션 스타일 */
+  .pagination {
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+  
+  .paginationButtons {
+    gap: var(--spacing-xs);
+  }
+  
+  .pageBtn {
+    min-width: 36px;
+    height: 36px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+  
+  .pageBtn.navBtn {
+    min-width: 55px;
+  }
 }
 
 /* Mobile styles */
@@ -223,6 +356,31 @@
   
   .statNumber {
     font-size: var(--font-size-2xl);
+  }
+  
+  /* 모바일 페이지네이션 스타일 */
+  .pagination {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+  
+  .paginationButtons {
+    gap: var(--spacing-xs);
+  }
+  
+  .pageBtn {
+    min-width: 32px;
+    height: 32px;
+    padding: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+  }
+  
+  .pageBtn.navBtn {
+    min-width: 45px;
+  }
+  
+  .pageInfo {
+    font-size: var(--font-size-xs);
   }
 }
 

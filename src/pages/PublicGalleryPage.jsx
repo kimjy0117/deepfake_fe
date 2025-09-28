@@ -10,7 +10,7 @@ const PublicGalleryPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const { publicFiles, loading, stats, loadPublicFiles, loadStats } = useGallery();
   
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 18;
 
   // 페이지네이션을 고려한 파일 로드
   const loadFilesWithPagination = async (page = 1, type = null) => {

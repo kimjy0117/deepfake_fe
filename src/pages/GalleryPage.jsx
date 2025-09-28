@@ -15,7 +15,7 @@ const GalleryPage = () => {
   const { user } = useAuth();
   const { myFiles, loading, loadMyFiles } = useGallery();
   
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 18;
 
   // 페이지네이션을 고려한 내 파일 로드
   const loadMyFilesWithPagination = async (page = 1, type = null) => {
